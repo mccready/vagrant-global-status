@@ -8,6 +8,7 @@ module VagrantPlugins
       def initialize(path, data)
         @path = Pathname(path)
         @machine_names = Array(data['machines']).map{|machine| machine['name']}
+        @ign = data['ign']
         @created_at = {} 
         data['machines'].each do |machine|
           ctime = machine['created_at']
@@ -24,7 +25,7 @@ module VagrantPlugins
 
         matches = vagrant_status.scan(/(\w[\w-]+)\s+(\w[\w\s]+)\s+\((\w+)\)/)
         matches.map do |vm, status, provider|
-          if all || (@machine_names.include?(vm) and status == "running")
+          if (all && !@ign) || (@machine_names.include?(vm) and status == "running")
             provider = "(#{provider})"
             "  #{vm.ljust(12)} #{status_line(status, 12)} #{provider.ljust(14)} #{@created_at[vm]}"
           end
